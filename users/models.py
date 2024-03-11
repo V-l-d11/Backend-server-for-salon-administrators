@@ -69,8 +69,9 @@ class Worker(models.Model):
     id = models.AutoField(primary_key=True)
     name=models.CharField(max_length=100)
     work_time = ArrayField(models.DateTimeField(),null=True)
-    servicesList=models.ManyToManyField(Service, related_name='workers',blank=True)
-    
+    servicesList=models.ManyToManyField(Service, related_name='workers')
+    work_schedule=models.ManyToManyField('WorkSchedule', related_name='workers')
+
     def is_avalable(self,start_time,end_time):
         conflicting_records= Record.objects.filter(
             master=self,
@@ -83,7 +84,10 @@ class Worker(models.Model):
         return self.name
 
 
-
+class WorkSchedule(models.Model):
+    worker=models.ForeignKey(Worker, on_delete=models.CASCADE)
+    start_time=models.TimeField()
+    end_time=models.TimeField()
 
 
 
@@ -117,7 +121,15 @@ class RecordNew(models.Model):
         ).exclude(pk=self.pk)  # Исключаем текущую запись при обновлении
         if conflicting_records.exists():
             raise ValidationError("Мастер уже занят в это время")
-
+        
+        work_schedule = WorkSchedule.objects.filter(
+            worker=self.worker,
+            start_time__lte=self.start_time.time(),
+            end_time__gte=self.end_time.time()
+        )
+        if not work_schedule.exists():
+            raise ValidationError("Запись не входит в рабочее время мастера")
+        
     def save(self,*args,**kwargs):
         self.clean()
         super().save(*args,**kwargs)

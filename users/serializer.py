@@ -22,17 +22,8 @@ class WorkerSerializer(serializers.ModelSerializer):
     servicesList=serializers.PrimaryKeyRelatedField(queryset=Service.objects.all(), many=True)
     class Meta:
         model=Worker
-        fields=['id','name','work_time','servicesList']
-        extra_kwargs={
-            'work_time':{'required':False},
-            'servicesList':{'required':False}
-        }
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        services_list = representation.get('servicesList')
-        if services_list:
-            representation['servicesList'] = [Service.objects.get(pk=pk).name for pk in services_list]
-        return representation    
+        fields=['id','name','services','work_schedule']
+    
 
 ##########################################
 

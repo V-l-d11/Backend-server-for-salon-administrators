@@ -24,11 +24,11 @@ def helloWorld(HttpRequest):
 
 
 #Worker by id- get, update, delete
-class WorkerM(generics.RetrieveUpdateDestroyAPIView):
+class WorkerListCreateAPIView(generics.ListCreateAPIView):
     queryset=Worker.objects.all()
     serializer_class=WorkerSerializer
 
-class WorkerListM(generics.ListCreateAPIView):
+class WorkerRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Worker.objects.all()
     serializer_class = WorkerSerializer
 
